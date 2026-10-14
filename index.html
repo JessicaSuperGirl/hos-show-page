@@ -16,7 +16,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            /* 动态渐变背景保持不变 */
             background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
@@ -30,7 +29,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* 毛玻璃卡片 */
+        /* 毛玻璃卡片 - 默认状态 */
         .glass-card {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(16px);
@@ -38,12 +37,19 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 24px;
             padding: 40px 30px;
-            max-width: 450px;
             width: 100%;
+            max-width: 400px; /* 初始宽度 */
             text-align: center;
             color: #fff;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-            transition: all 0.3s ease;
+            /* 核心：添加丝滑的形变过渡动画 */
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); 
+        }
+
+        /* 卡片展开后的游戏机状态 */
+        .glass-card.playing {
+            max-width: 900px; /* 展开成超宽屏，视野更好 */
+            padding: 20px;
         }
 
         .icon {
@@ -92,31 +98,43 @@
             transform: scale(1.05);
         }
 
-        /* 原版游戏内嵌区域 */
+        /* 游戏区域 */
         #gameArea {
             display: none;
             width: 100%;
-            height: 350px; /* 为原版游戏留出足够高度 */
-            background-color: #fff; /* 原版游戏背景需要是白色 */
+            height: 350px; /* 横版跑酷高度不需要太高，主要靠宽度 */
+            background-color: #fff;
             border-radius: 16px;
             overflow: hidden;
             border: 2px solid rgba(255, 255, 255, 0.5);
             position: relative;
+            /* 淡入动画 */
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         iframe {
             width: 100%;
             height: 100%;
             border: none;
-            /* 修正 iframe 内部的缩放以适配移动端 */
-            transform-origin: top left;
         }
 
         .tip-text {
-            font-size: 12px;
-            color: rgba(255,255,255,0.7);
-            margin-top: 15px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.8);
+            margin-top: 12px;
             display: none;
+        }
+
+        /* 适配手机竖屏：稍微缩小高度 */
+        @media (max-width: 600px) {
+            #gameArea {
+                height: 250px; 
+            }
         }
 
     </style>
@@ -132,36 +150,36 @@
             <p><strong>最后它选择了后者。</strong></p>
             <p>既然来都来了，在此挑战一下原汁原味的小恐龙吧！</p>
             
-            <button class="btn" onclick="startGame()">🦖 启动原版小恐龙</button>
+            <button class="btn" onclick="startGame()">🦖 启动小恐龙游戏机</button>
         </div>
 
-        <!-- 游戏内嵌界面 -->
+        <!-- 游戏界面 -->
         <div id="gameArea">
-            <!-- 直接引用开源社区 1:1 提取的 Chrome 官方游戏纯净镜像 -->
             <iframe id="dinoFrame" src="https://wayou.github.io/t-rex-runner/" scrolling="no"></iframe>
         </div>
         <div class="tip-text" id="gameTip">
-            👆 电脑端请先点击一下上方白框，再按【空格键】游玩<br>手机端直接点击上方白框区域即可跳跃
+            👆 电脑端点击上方白框后按【空格键】<br>手机端建议【横屏】游玩，点击白框区域跳跃
         </div>
     </div>
 
     <script>
         function startGame() {
-            // 隐藏欢迎文字
+            // 隐藏文字介绍
             document.getElementById('introArea').style.display = 'none';
-            // 显示游戏区域
-            document.getElementById('gameArea').style.display = 'block';
-            document.getElementById('gameTip').style.display = 'block';
             
-            // 调整外层卡片的内边距，让白框游戏机显得更饱满
-            document.getElementById('cardContainer').style.padding = '20px';
+            // 让卡片变宽
+            document.getElementById('cardContainer').classList.add('playing');
             
-            // 尝试让 iframe 获得焦点，以便直接按空格键生效
+            // 等待卡片变宽的动画执行一半时，再显示游戏区域，显得更丝滑
             setTimeout(() => {
+                document.getElementById('gameArea').style.display = 'block';
+                document.getElementById('gameTip').style.display = 'block';
+                
+                // 聚焦游戏，方便电脑用户直接按空格
                 const iframe = document.getElementById('dinoFrame');
                 iframe.focus();
                 iframe.contentWindow.focus();
-            }, 100);
+            }, 250);
         }
     </script>
 </body>
