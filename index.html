@@ -5,21 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Surprise! 🎉</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            /* 动态渐变背景保持不变 */
             background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
             background-size: 400% 400%;
             animation: gradientBG 15s ease infinite;
             overflow: hidden;
             padding: 20px;
-            /* 阻止在手机上连按选中文字 */
-            user-select: none; 
-            -webkit-user-select: none;
         }
         
         @keyframes gradientBG {
@@ -28,6 +30,7 @@
             100% { background-position: 0% 50%; }
         }
 
+        /* 毛玻璃卡片 */
         .glass-card {
             background: rgba(255, 255, 255, 0.15);
             backdrop-filter: blur(16px);
@@ -35,195 +38,130 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 24px;
             padding: 40px 30px;
-            max-width: 400px;
+            max-width: 450px;
             width: 100%;
             text-align: center;
             color: #fff;
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            display: inline-block;
+            animation: heartbeat 1.5s infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 30%, 60% { transform: scale(1); }
+            15%, 45% { transform: scale(1.2); }
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            letter-spacing: 1px;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 28px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background: #fff;
+            color: #e73c7e;
+            box-shadow: 0 0 20px rgba(255,255,255,0.4);
+            transform: scale(1.05);
+        }
+
+        /* 原版游戏内嵌区域 */
+        #gameArea {
+            display: none;
+            width: 100%;
+            height: 350px; /* 为原版游戏留出足够高度 */
+            background-color: #fff; /* 原版游戏背景需要是白色 */
+            border-radius: 16px;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.5);
             position: relative;
         }
 
-        .icon { font-size: 60px; margin-bottom: 20px; display: inline-block; animation: heartbeat 1.5s infinite; }
-        @keyframes heartbeat { 0%, 30%, 60% { transform: scale(1); } 15%, 45% { transform: scale(1.2); } }
-        
-        h1 { font-size: 24px; margin-bottom: 15px; font-weight: 600; letter-spacing: 1px; }
-        p { font-size: 16px; line-height: 1.6; margin-bottom: 25px; color: rgba(255, 255, 255, 0.9); }
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            /* 修正 iframe 内部的缩放以适配移动端 */
+            transform-origin: top left;
+        }
 
-        .btn {
-            display: inline-block; padding: 12px 28px; background: rgba(255, 255, 255, 0.2);
-            color: #fff; text-decoration: none; border-radius: 50px; font-weight: bold;
-            border: 1px solid rgba(255, 255, 255, 0.5); transition: all 0.3s ease; cursor: pointer;
+        .tip-text {
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+            margin-top: 15px;
+            display: none;
         }
-        .btn:hover { background: #fff; color: #e73c7e; box-shadow: 0 0 20px rgba(255,255,255,0.4); transform: scale(1.05); }
-        .footer-text { margin-top: 20px; font-size: 12px; color: rgba(255, 255, 255, 0.6); }
 
-        /* 游戏区域样式 */
-        #gameArea { display: none; }
-        canvas {
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 12px;
-            margin-bottom: 15px;
-            border: 1px solid rgba(255,255,255,0.2);
-            touch-action: none; /* 防止手机端下拉刷新 */
-        }
-        .game-header { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: bold; }
-        #gameOverOverlay {
-            display: none; position: absolute; top: 40%; left: 50%;
-            transform: translate(-50%, -50%); background: rgba(0,0,0,0.6);
-            padding: 15px 30px; border-radius: 12px; width: 80%;
-        }
     </style>
 </head>
 <body>
 
-    <div class="glass-card">
-        <!-- 初始介绍页面 -->
+    <div class="glass-card" id="cardContainer">
+        <!-- 初始提示界面 -->
         <div id="introArea">
             <div class="icon">💖</div>
             <h1>骗到你了！</h1>
             <p>当你的手机扫过这个码时，我的代码花了 0.001 秒思考是收下你的钱，还是给你一个拥抱。</p>
             <p><strong>最后它选择了后者。</strong></p>
-            <p>既然来都来了，不如在这打发一下时间吧？</p>
-            <button class="btn" onclick="startGame()">🦖 在此开启跑酷挑战</button>
-            <div class="footer-text">Intercepted successfully by Developer's Conscience.</div>
+            <p>既然来都来了，在此挑战一下原汁原味的小恐龙吧！</p>
+            
+            <button class="btn" onclick="startGame()">🦖 启动原版小恐龙</button>
         </div>
 
-        <!-- 游戏页面 -->
+        <!-- 游戏内嵌界面 -->
         <div id="gameArea">
-            <div class="game-header">
-                <span>HI <span id="highScore">0</span></span>
-                <span>得分: <span id="score">0</span></span>
-            </div>
-            <div style="position: relative;">
-                <canvas id="gameCanvas" width="320" height="150"></canvas>
-                <div id="gameOverOverlay">
-                    <h2 style="margin-bottom: 10px;">GAME OVER</h2>
-                    <button class="btn" style="padding: 8px 20px; font-size: 14px;" onclick="resetGame()">🔄 再来一次</button>
-                </div>
-            </div>
-            <p style="font-size: 12px; color: rgba(255,255,255,0.7); margin-bottom:0;">电脑按[空格键]，手机[点击画面]跳跃</p>
-            <div class="footer-text" style="margin-top: 15px;">
-                <a href="https://github.com/jialifushi" target="_blank" style="color: #fff; text-decoration: underline;">去 GitHub 看看作者</a>
-            </div>
+            <!-- 直接引用开源社区 1:1 提取的 Chrome 官方游戏纯净镜像 -->
+            <iframe id="dinoFrame" src="https://wayou.github.io/t-rex-runner/" scrolling="no"></iframe>
+        </div>
+        <div class="tip-text" id="gameTip">
+            👆 电脑端请先点击一下上方白框，再按【空格键】游玩<br>手机端直接点击上方白框区域即可跳跃
         </div>
     </div>
 
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        let animationId;
-        let score = 0;
-        let highScore = localStorage.getItem('dinoHighScore') || 0;
-        document.getElementById('highScore').innerText = highScore;
-        
-        let isGameOver = false;
-        let frameCount = 0;
-        let gameSpeed = 3;
-
-        // 恐龙对象
-        const dino = { x: 30, y: 110, w: 24, h: 24, dy: 0, jumpPower: -8.5, gravity: 0.5, grounded: true };
-        // 障碍物数组
-        let obstacles = [];
-
         function startGame() {
+            // 隐藏欢迎文字
             document.getElementById('introArea').style.display = 'none';
+            // 显示游戏区域
             document.getElementById('gameArea').style.display = 'block';
-            resetGame();
-        }
-
-        function resetGame() {
-            obstacles = [];
-            score = 0;
-            frameCount = 0;
-            gameSpeed = 3;
-            isGameOver = false;
-            dino.y = 110;
-            dino.dy = 0;
-            dino.grounded = true;
-            document.getElementById('gameOverOverlay').style.display = 'none';
-            document.getElementById('score').innerText = score;
-            cancelAnimationFrame(animationId);
-            gameLoop();
-        }
-
-        function jump() {
-            if (isGameOver) return;
-            if (dino.grounded) {
-                dino.dy = dino.jumpPower;
-                dino.grounded = false;
-            }
-        }
-
-        // 监听按键和点击
-        window.addEventListener('keydown', (e) => { if (e.code === 'Space') jump(); });
-        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); jump(); }, {passive: false});
-        canvas.addEventListener('mousedown', jump);
-
-        function gameLoop() {
-            if (isGameOver) return;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            document.getElementById('gameTip').style.display = 'block';
             
-            // 绘制地平线
-            ctx.beginPath();
-            ctx.moveTo(0, 135);
-            ctx.lineTo(canvas.width, 135);
-            ctx.strokeStyle = "rgba(255,255,255,0.3)";
-            ctx.stroke();
-
-            // 恐龙物理计算
-            dino.dy += dino.gravity;
-            dino.y += dino.dy;
-            if (dino.y >= 110) {
-                dino.y = 110;
-                dino.dy = 0;
-                dino.grounded = true;
-            }
-
-            // 绘制恐龙 (Emoji)
-            ctx.font = "24px Arial";
-            ctx.fillText("🦖", dino.x, dino.y + 22); 
-
-            // 生成障碍物 (随机间隔)
-            if (frameCount % Math.floor(Math.random() * 60 + 80) === 0) {
-                obstacles.push({ x: canvas.width, y: 110, w: 20, h: 24 });
-            }
-
-            // 遍历并绘制障碍物
-            for (let i = 0; i < obstacles.length; i++) {
-                let obs = obstacles[i];
-                obs.x -= gameSpeed;
-                ctx.fillText("🌵", obs.x, obs.y + 22);
-
-                // 简单的碰撞检测 (留了一点容错率)
-                if (dino.x < obs.x + obs.w - 5 && dino.x + dino.w - 5 > obs.x &&
-                    dino.y < obs.y + obs.h - 5 && dino.y + dino.h - 5 > obs.y) {
-                    gameOver();
-                }
-            }
-
-            // 清理移出屏幕的障碍物
-            obstacles = obstacles.filter(obs => obs.x > -30);
-
-            // 分数计算与难度递增
-            if (frameCount % 10 === 0) {
-                score++;
-                document.getElementById('score').innerText = score;
-                if (score % 100 === 0) gameSpeed += 0.5; // 每100分加速
-            }
-
-            frameCount++;
-            animationId = requestAnimationFrame(gameLoop);
-        }
-
-        function gameOver() {
-            isGameOver = true;
-            document.getElementById('gameOverOverlay').style.display = 'block';
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('dinoHighScore', highScore);
-                document.getElementById('highScore').innerText = highScore;
-            }
+            // 调整外层卡片的内边距，让白框游戏机显得更饱满
+            document.getElementById('cardContainer').style.padding = '20px';
+            
+            // 尝试让 iframe 获得焦点，以便直接按空格键生效
+            setTimeout(() => {
+                const iframe = document.getElementById('dinoFrame');
+                iframe.focus();
+                iframe.contentWindow.focus();
+            }, 100);
         }
     </script>
 </body>
